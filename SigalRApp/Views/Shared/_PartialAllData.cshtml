@@ -1,0 +1,38 @@
+﻿@model IEnumerable<SigalRApp.Models.DevTest>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Compaign Name</th>
+            <th>Date</th>
+            <th>Conversions</th>
+            <th>Impressions</th>
+            <th>Affiliate Name</th>
+            <th>Clicks</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.CampaignName</td>
+                <td>@Convert.ToDateTime(m.Date).ToShortDateString()</td>
+                <td>@m.Conversions</td>
+                <td>@m.Impressions</td>
+                <td>@m.AffiliateName</td>
+                <td>@m.Clicks</td>
+            <td><input type="submit" class="btn btn-danger" value="Edit" onclick="filldata(@m.ID)" /></td>
+            <td><input type="submit" class="btn btn-danger" value="Delete" onclick="deletedata(@m.ID)" /></td>
+        </tr>
+        }
+
+    </tbody>
+
+
+
+</table>
+
+

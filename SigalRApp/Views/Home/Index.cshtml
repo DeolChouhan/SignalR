@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<div style="margin-top:30px">
+
+    <div class="col-md-12">
+        <div class="col-md-4">
+            <table class="table table-striped">
+                <tr>
+                    <td>Campaign Name</td>
+                    <td><input type="text" id="txtcampaign" class="form-control" /></td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td><input type="text" id="txtdate" class="form-control" /></td>
+                </tr>
+                <tr>
+                    <td>Conversions</td>
+                    <td><input type="text" id="txtconversions" class="form-control" /></td>
+                </tr>
+                <tr>
+                    <td>Clicks</td>
+                    <td><input type="text" id="txtclicks" class="form-control" /></td>
+                </tr>
+                <tr>
+                    <td>Impressions</td>
+                    <td><input type="text" id="txtimpressions" class="form-control" /></td>
+                </tr>
+                <tr>
+                    <td>Affiliate Name</td>
+                    <td><input type="text" id="txtaffliatename" class="form-control" /></td>
+                </tr>
+
+                <tr>
+                    <td><input type="submit" id="btnSave" value="Save" class="btn btn-success" /></td>
+                    <td><input type="submit" id="btnCancel" value="Cancel" class="btn btn-danger" /></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-md-8">
+            <div class="row">
+                <div id="divdata"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<input type="hidden" id="hdnId" value="0" />
+
+
+@section Scripts{
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="/signalr/hubs"></script>
+    <script>
+        $(function () {
+            $("#txtdate").datepicker();
+            // Create a proxy to signalr hub on web server. It reference the hub.
+            var notificationFromHub = $.connection.tenantHub;
+            $.connection.hub.start().done(function () {
+                GetAllData();
+            });
+
+            // Notify to client with the recent updates
+            notificationFromHub.client.updatedClients = function () {
+                GetAllData();
+            };
+        });
+        //---------------Insert Data------
+        $("#btnSave").click(function () {
+            var data = {
+                ID: $("#hdnId").val(),
+                CampaignName: $("#txtcampaign").val(),
+                Date: $("#txtdate").val(),
+                Conversions: $("#txtconversions").val(),
+                Impressions: $("#txtimpressions").val(),
+                AffiliateName: $("#txtaffliatename").val(),
+                Clicks: $("#txtclicks").val()
+            };
+
+            $.ajax({
+                url: '/Home/InsertData',
+                data: data,
+                datatype: 'json',
+                type: 'Post',
+                success: function (data) {
+                    alert(data.msg);
+                    $(".form-control").val('');
+                    $("#hdnId").val('0')
+                },
+                faliure: function () {
+                    alert(data.msg);
+                }
+
+            });
+        });
+
+        //--------------Get All Data------
+        function GetAllData() {
+            $.ajax({
+                url: '/Home/GetAllData',
+                data: '',
+                datatype: 'HTML',
+                type: 'Get',
+                success: function (data) {
+                    $("#divdata").empty();
+                    $("#divdata").append(data);
+                },
+                faliure: function () {
+                    alert(data.msg);
+                }
+
+            });
+
+        }
+
+        //----------Cancel---------
+
+        $("#btnCancel").click(function () {
+            $(".form-control").val('');
+        });
+
+
+        //-------------------Delete Data------------
+        function deletedata(id) {
+            if (confirm("Are you sure?")) {
+                var data = {
+                    id: id
+                };
+                $.ajax({
+                    url: '/Home/DeleteData',
+                    data: data,
+                    datatype: 'json',
+                    type: 'Post',
+                    success: function (data) {
+                        alert(data.msg);
+                    },
+                    faliure: function () {
+                        alert(data.msg);
+                    }
+
+                });
+            }
+            return false;
+
+        }
+
+        //-----------------------Fill data---------
+
+        function filldata(id) {
+            var data = {
+                id: id
+            };
+            $.ajax({
+                url: '/Home/GetDataById',
+                data: data,
+                datatype: 'json',
+                type: 'Get',
+                success: function (data) {
+                    $("#txtcampaign").val(data.Result.CampaignName);
+                    $("#txtdate").val(data.modelDate);
+                    $("#txtconversions").val(data.Result.Conversions);
+                    $("#txtimpressions").val(data.Result.Impressions);
+                    $("#txtaffliatename").val(data.Result.AffiliateName);
+                    $("#txtclicks").val(data.Result.Clicks);
+                    $("#hdnId").val(data.Result.ID);
+                },
+                faliure: function () {
+                    alert(data.msg);
+                }
+
+            });
+        }
+    </script>
+
+
+
+}
+
+
